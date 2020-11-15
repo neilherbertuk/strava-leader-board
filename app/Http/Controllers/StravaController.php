@@ -14,22 +14,22 @@ class StravaController extends Controller
 {
     public function index()
     {
-        $users = StravaUser::get();
-        if (count($users) > 0){
-            $users->each(function($user){
-                $user->total_distance_meters = $user->activities->sum('distance');
-                $user->total_distance_miles = round(($user->total_distance_meters / 1609), 2);
-                $user->total_moving_time = $user->activities->sum('moving_time');
-                $user->total_moving_time_hum = $this->secondsToTime($user->activities->sum('moving_time'));
-                $user->total_activities = count($user->activities);
-                $user->walk_count = count($user->activities()->where('type', '=', 'walk')->get());
-                $user->run_count = count($user->activities()->where('type', '=', 'run')->get());
-                $user->max_speed = $user->activities->max('max_speed');
-                $user->profile_link = 'https://www.strava.com/athletes/'. $user->strava_id;
-                return $user;
-            });
-            $users = $users->sortByDesc('total_distance_meters');
-        }
+        $users = StravaUser::get()->sortByDesc('total_distance_meters');
+
+        $first = true;
+        $users = $users->each(function($user) use (&$first){
+            if ($first){
+                $leader_for = Carbon::parse($user->last_took_lead)->diffInSeconds(Carbon::now());
+                $user->time_in_lead_hum = $this->secondsToTime($leader_for);
+                $user->total_time_in_lead = $user->time_in_lead + $leader_for;
+                $first = false;
+            } else {
+                $user->total_time_in_lead = $user->time_in_lead;
+            }
+
+            $user->total_time_in_lead_hum = $this->secondsToTime($user->total_time_in_lead);
+        });
+
         return view('dashboard', ['users' => $users, 'strava_get_activities_time' => Cache::store('file')->get('strava_get_activities_time', 'unknown'), 'strava_next_activities_time' => Cache::store('file')->get('strava_next_activities_time', 'unknown')]);
     }
 

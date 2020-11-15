@@ -77,12 +77,13 @@ class GetActivities extends Command
 
                 $now = Carbon::now()->timestamp;
                 $activities = collect(Strava::activities($user->access_token, 1, 100, $now, ($user->activities_until->timestamp - 1)));
+                $activities = $activities->reverse();
 
                 if(count($activities) == 0) {
                     Log::info('No activities found for user');
                 } else {
                     Log::info(count($activities) .' activities found');
-                    $activities->each(function ($activity) use ($user) {
+                    $activities->each(function ($activity) use (&$user) {
                         if (count($user->activities()->where('id', '=', $activity->id)->get()) > 0) {
                             Log::info('Strava Activity ' . $activity->id . ' already exists');
                         } else {
@@ -102,15 +103,18 @@ class GetActivities extends Command
                                 'average_speed' => $activity->average_speed,
                                 'max_speed' => $activity->max_speed
                             ]);
+                            $user->activities_until = Carbon::parse($activity->start_date)->addSeconds($activity->elapsed_time);
                         }
                     });
-                    $user->activities_until = $now;
                     $user->save();
                 }
 
                 Log::info('Finished logging activities for '. $user->id);
             });
         }
+
+        // Analyse Activities
+        $this->call('strava:analyseactivities');
 
         // Generate updated at and next update timestamps
         $now = Carbon::now();
@@ -119,8 +123,9 @@ class GetActivities extends Command
         $start = Carbon::createFromTimeString('05:00');
         $end = Carbon::createFromTimeString('23:00');
 
+
         if ($now->between($start, $end)) {
-            Cache::store('file')->put('strava_next_activities_time', $now->addMinutes(15)->toDateTimeString());
+            Cache::store('file')->put('strava_next_activities_time', $now->toDateTimeString());
         } else {
             if ($now->isBefore($start)) {
                 Cache::store('file')->put('strava_next_activities_time', Carbon::create($now->year,$now->month,$now->day,5,0,0)->toDateTimeString());

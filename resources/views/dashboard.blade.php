@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lockdown v2 Challenge Leader Board</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
     <style>
         body {
             margin: 0;
@@ -123,6 +124,15 @@
             padding: 0 15px;
         }
 
+        .footer a, .footer a:active {
+            color: darkblue;
+            text-decoration: none;
+        }
+        a:hover {
+            color: #c8c8c8;
+            text-decoration: none;
+        }
+
         .footer_byline {
             font-size:0.75em;
         }
@@ -146,6 +156,12 @@
                     @if (!empty($user->profile_link))
                     </a>
                     @endif
+                    @if ($loop->index == 0)
+                    <br/><br /><b>Time Since Taking Lead</b><br />
+                    {{ $user->time_in_lead_hum }}
+                    @endif
+                    <br/><br/><b>Total Time As Leader</b><br/>
+                    {{ $user->total_time_in_lead_hum }}
                 </div>
                 <div class="main_athlete_card-info" style="margin-left:30px">
                     <b>Total Distance</b><br />
@@ -174,13 +190,13 @@
                 <div>
                     <p>The short answer; there's nothing quite like a bit of sibling rivalry!</p>
                     <p>I'm Neil, based in the UK and over the past year I've been working from home, so have erm, put on a bit of extra weight. Now that the UK has gone back into a 2nd lockdown, my sister has challenged me see who can do the most miles between November 9th and the end of lockdown. We're using Strava to track our walks and runs.</p>
-                    <p>Dashboard has been lovingly built with Laravel &hearts; and CSS Flexbox. Data is fetched from Strava's API every 15 minutes between 05:00 and 23:00.</p>
+                    <p>Dashboard has been lovingly built with <a href="https://www.laravel.com">Laravel</a> &hearts; and CSS Flexbox. Data is fetched from Strava's API every 15 minutes between 05:00 and 23:00.</p>
                 </div>
             </div>
         </div>
     </main>
     <footer class="footer">
-        <div class="footer_copyright">&copy;2020</div>
+        <div class="footer_copyright">&copy;2020 <a href="https://github.com/neilherbertuk/strava-leader-board"><i class="fa fa-github" aria-hidden="true"></i></a> <a href="https://twitter.com/NeilHerbert"><i class="fa fa-twitter" aria-hidden="true"></i></a></div>
         <div class="footer_byline">Last Updated @ {{ $strava_get_activities_time }}<br/>Next Update @ {{ $strava_next_activities_time }}</div>
     </footer>
 </body>

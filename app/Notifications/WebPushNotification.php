@@ -30,6 +30,7 @@ class WebPushNotification extends Notification
     {
         return (new WebPushMessage())
             ->title($this->title)
-            ->body($this->body);
+            ->body($this->body)
+            ->action('View leader board', 'open');
     }
 }

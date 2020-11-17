@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Guest;
 use App\Models\StravaUser;
 use App\Notifications\LeaderChangedPush;
+use App\Notifications\WebPushNotification;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -67,7 +68,8 @@ class AnalyseActivities extends Command
             $leader_changed = false;
             $isFirst = true;
             $leader_activity_time = null;
-            $users->each(function($user) use (&$leader_changed, &$isFirst, &$leader_activity_time){
+            $leader = null;
+            $users->each(function($user) use (&$leader_changed, &$isFirst, &$leader_activity_time, &$leader){
     		// Is this the first entry (leader)
                 if ($isFirst) {
 		        Log::info('Processing leader '. $user->strava_id);
@@ -78,6 +80,7 @@ class AnalyseActivities extends Command
 		            	$user->last_took_lead = $user->activities_until;
                         $leader_activity_time = $user->activities_until;
 			            $leader_changed = true;
+			            $leader = $user->username;
                     }
                     $isFirst = false;
 		} else {
@@ -101,11 +104,16 @@ class AnalyseActivities extends Command
 
         // Send push notification
         if ($leader_changed) {
-            Notification::send(Guest::all(), new LeaderChangedPush());
+            Notification::send(Guest::all(), new WebPushNotification('Lockdown Challenge', $leader .' just took the lead'));
         }
         return 0;
     }
 
+    /**
+     * Convert seconds to a human readable "1 day, 23 hours, 32 minutes"
+     * @param $inputSeconds
+     * @return string
+     */
     protected function secondsToTime($inputSeconds) {
         $secondsInAMinute = 60;
         $secondsInAnHour = 60 * $secondsInAMinute;

@@ -17,3 +17,4 @@ Route::get('/', \App\Http\Controllers\StravaController::class .'@index');
 Route::get('/strava/auth', \App\Http\Controllers\StravaController::class .'@auth');
 Route::get('/strava/callback', \App\Http\Controllers\StravaController::class .'@authCallback');
 Route::post('/push',\App\Http\Controllers\PushController::class .'@store');
+Route::get('/push/success/{guest_id}',\App\Http\Controllers\PushController::class .'@success');

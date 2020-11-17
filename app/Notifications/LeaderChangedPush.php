@@ -23,6 +23,6 @@ class LeaderChangedPush extends Notification
         return (new WebPushMessage())
             ->title('Lockdown Challenge')
             ->body('Theres a new leader!')
-            ->action('View App', 'notification_action');
+            ->action('View leader board', 'open');
     }
 }

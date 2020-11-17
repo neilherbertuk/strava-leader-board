@@ -14,3 +14,10 @@ self.addEventListener('push', function (e) {
         }));
     }
 });
+
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close()
+    console.log('notificationclick')
+    clients.openWindow("/")
+
+}, false);

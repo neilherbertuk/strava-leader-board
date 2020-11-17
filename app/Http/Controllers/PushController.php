@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Guest;
 use App\Notifications\LeaderChangedPush;
-use App\Notifications\SuccessfullySubscribed;
+use App\Notifications\WebPushNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
@@ -33,19 +33,17 @@ class PushController extends Controller
         $user->uuid = Str::uuid();
         $user->save();
         $user->updatePushSubscription($endpoint, $key, $token);
-        return response()->json(['success' => true],200);
-    }
-
-    public function push()
-    {
-        Notification::send(Guest::all(),new LeaderChangedPush());
-        return redirect()->back();
+        return response()->json(['success' => true, 'uuid' => $user->uuid],200);
     }
 
     public function success($guest_id)
     {
-        Notification::send(Guest::find($guest_id)->first(),new SuccessfullySubscribed());
-        //Notification::send(Guest::all(),new LeaderChangedPush());
+        $guest = Guest::where('uuid', '=', $guest_id)->first();
+        if (!empty($guest)) {
+            Notification::send($guest, new LeaderChangedPush());//new WebPushNotification('Lockdown Challenge', 'Success! You\'ll receive updates via Push notifications'));
+            $guest->uuid = Str::uuid();
+            $guest->save();
+        }
         return redirect()->back();
     }
 

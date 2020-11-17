@@ -9,9 +9,17 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\WebPush\WebPushChannel;
 use NotificationChannels\WebPush\WebPushMessage;
 
-class SuccessfullySubscribed extends Notification
+class WebPushNotification extends Notification
 {
     use Queueable;
+
+    protected $title, $body;
+
+    public function __construct($title, $body)
+    {
+        $this->title = $title;
+        $this->body = $body;
+    }
 
     public function via($notifiable)
     {
@@ -21,7 +29,7 @@ class SuccessfullySubscribed extends Notification
     public function toWebPush($notifiable, $notification)
     {
         return (new WebPushMessage())
-            ->title('Push Notifications Enabled')
-            ->body('Thanks for subscribing!');
+            ->title($this->title)
+            ->body($this->body);
     }
 }

@@ -90,10 +90,27 @@ function storePushSubscription(pushSubscription) {
         }
     })
         .then((res) => {
-            return res.json();
+            return res.json()
         })
         .then((res) => {
-            console.log(res)
+            if (res.uuid !== undefined) {
+                fetch('/push/success/' + res.uuid, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': token
+                    }
+                })
+                .then((res) => {
+                    if (typeof(Storage) !== "undefined") {
+                        localStorage.setItem('subscribed', true)
+                    } else {
+                        console.log('Local storage not supported')
+                    }
+                    return res.json()
+                })
+            }
         })
         .catch((err) => {
             console.log(err)

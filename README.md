@@ -42,6 +42,8 @@ The cronjob will run every 15 minutes between 5 am and 11 pm.
 
 Register an application with Strava's developer portal and update `.env` with the client_id and client_secret. Update the redirect URI entry to reflect the correct domain for your application.
 
+Update the public push notification key within `public\js\enable-push.js` under `applicationServerKey`
+
 ### Adding Athletes
 
 To allow athletes to enrol with your leader board, set `ALLOW_STRAVA_AUTH` to true - make sure you set this to false when done otherwise anyone will be able to add them-selves to your board.

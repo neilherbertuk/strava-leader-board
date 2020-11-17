@@ -40,7 +40,7 @@ class PushController extends Controller
     {
         $guest = Guest::where('uuid', '=', $guest_id)->first();
         if (!empty($guest)) {
-            Notification::send($guest, new LeaderChangedPush());//new WebPushNotification('Lockdown Challenge', 'Success! You\'ll receive updates via Push notifications'));
+            Notification::send($guest, new WebPushNotification('Lockdown Challenge', 'Success! You\'ll receive updates via Push notifications'));
             $guest->uuid = Str::uuid();
             $guest->save();
         }

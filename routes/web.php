@@ -13,8 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/welcome', function(){return view('welcome');});
 Route::get('/', \App\Http\Controllers\StravaController::class .'@index');
 Route::get('/strava/auth', \App\Http\Controllers\StravaController::class .'@auth');
 Route::get('/strava/callback', \App\Http\Controllers\StravaController::class .'@authCallback');
-
+Route::post('/push',\App\Http\Controllers\PushController::class .'@store');

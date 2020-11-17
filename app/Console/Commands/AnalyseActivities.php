@@ -2,10 +2,13 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Guest;
 use App\Models\StravaUser;
+use App\Notifications\LeaderChangedPush;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class AnalyseActivities extends Command
 {
@@ -40,12 +43,13 @@ class AnalyseActivities extends Command
      */
     public function handle()
     {
-
+	Log::info('Analysing Activities');
         // Loop through users updating stats
         $users = StravaUser::get();
         if (count($users) > 0){
             $users->each(function($user){
-                $user->total_distance_meters = $user->activities->sum('distance');
+	        Log::info('Analysing metrics for '. $user->strava_id);
+	        $user->total_distance_meters = $user->activities->sum('distance');
                 $user->total_distance_miles = round(($user->total_distance_meters / 1609), 2);
                 $user->total_moving_time = $user->activities->sum('moving_time');
                 $user->total_moving_time_hum = $this->secondsToTime($user->activities->sum('moving_time'));
@@ -57,37 +61,47 @@ class AnalyseActivities extends Command
                 return $user;
             });
 
-            // Update the leader board
+	        // Update the leader board
+	        Log::info('Finding leader');
             $users = $users->sortByDesc('total_distance_meters');// Sort by largest distance
             $leader_changed = false;
             $isFirst = true;
             $leader_activity_time = null;
             $users->each(function($user) use (&$leader_changed, &$isFirst, &$leader_activity_time){
-                // Is this the first entry (leader)
+    		// Is this the first entry (leader)
                 if ($isFirst) {
-                    // Was this already the leader?
+		        Log::info('Processing leader '. $user->strava_id);
+	    	    // Was this already the leader?
                     if (!$user->is_in_lead){
+                        Log::info($user->strava_id .' took the lead at '. $leader_activity_time);
                         $user->is_in_lead = true;
-                        $user->last_took_lead = $user->activities_until;
+		            	$user->last_took_lead = $user->activities_until;
                         $leader_activity_time = $user->activities_until;
-                        $leader_changed = true;
+			            $leader_changed = true;
                     }
                     $isFirst = false;
-                } else {
-                    // Has the leader changed?
-                    if ($leader_changed) {
-                        // Was this athlete the previous leader?
-                        if ($user->is_in_lead) {
-                            // Increase time in lead
-                            $user->time_in_lead += $user->last_took_lead->diffInSeconds($leader_activity_time);
-                            $user->time_in_lead_hum = $this->secondsToTime($user->time_in_lead);
-                        }
-                        $user->is_in_lead = false;
-                    }
+		} else {
+		    Log::info('Processing non-leaders '. $user->strava_id);
+            // Has the leader changed?
+            if ($leader_changed) {
+                // Was this athlete the previous leader?
+                if ($user->is_in_lead) {
+                    Log::info($user->strava_id .' lost the lead at '. $leader_activity_time);
+                    // Increase time in lead
+                    $user->time_in_lead += $user->last_took_lead->diffInSeconds($leader_activity_time);
+                    $user->time_in_lead_hum = $this->secondsToTime($user->time_in_lead);
                 }
+                $user->is_in_lead = false;
+            }
+        }
 
-               $user->save();
-            });
+       $user->save();
+        });
+        }
+
+        // Send push notification
+        if ($leader_changed) {
+            Notification::send(Guest::all(), new LeaderChangedPush());
         }
         return 0;
     }

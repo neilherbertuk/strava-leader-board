@@ -21,6 +21,7 @@ Setup configuration
 ```bash
 cp .env.example .env
 php artisan key:generate
+php artisan webpush:vapid (for push notifications)
 ```
 
 Setup database
@@ -37,7 +38,7 @@ crontab -e
 * 5-22 * * * cd /path/to/repo && php artisan schedule:run
 ```
 
-The cronjob will run every minutes between 5 am and 11 pm.
+The cronjob will run every 15 minutes between 5 am and 11 pm.
 
 Register an application with Strava's developer portal and update `.env` with the client_id and client_secret. Update the redirect URI entry to reflect the correct domain for your application.
 
@@ -53,6 +54,8 @@ I wouldn't recommend using this for too many people as Strava have API rate limi
 The cronjob you've created above will run every minute between the hours of 5am and 11pm. The `strava:getavtivities` artisan command is then run every 15 minutes (during minutes 0, 15, 30 and 45). This can be changed within the `app\Console\kernel.php` file.
 
 You can manually sync with Strava by running `php artisan strava:getactivities` from the terminal.
+
+You will also need to analyse the activities by running `php artisan strava:analyseactivities` which will update the stats used for the leader board. This will also send push notifications to users to let them know if there is a new leader.
 
 ## Notes
 I'm using the package codetoad\laravel-strava to talk to the Strav API, however, this doesn't currently support Laravel 8, so I'm using a fork I've created for now.

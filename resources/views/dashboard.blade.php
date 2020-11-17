@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Lockdown v2 Challenge Leader Board</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
@@ -142,6 +143,7 @@
 <div class="grid-container">
     <header class="header">
         <div class="header_title">Lockdown v2 Challenge Leader Board</div>
+        <div class="header_right"><a href="#" onclick="initSW()"><i class="fa fa-bell" aria-hidden="true"></i></a></div>
     </header>
     <main class="main">
         <div class="main_cards">
@@ -199,5 +201,7 @@
         <div class="footer_copyright">&copy;2020 <a href="https://github.com/neilherbertuk/strava-leader-board"><i class="fa fa-github" aria-hidden="true"></i></a> <a href="https://twitter.com/NeilHerbert"><i class="fa fa-twitter" aria-hidden="true"></i></a></div>
         <div class="footer_byline">Last Updated @ {{ $strava_get_activities_time }}<br/>Next Update @ {{ $strava_next_activities_time }}</div>
     </footer>
+    <script src="{{ asset('js/enable-push.js') }}" defer></script>
+</div>
 </body>
 </html>
